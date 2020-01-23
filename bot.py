@@ -8,6 +8,8 @@ import bmemcached
 import re
 from prawcore import NotFound
 
+logger = logging
+
 # from https://github.com/arxiv-vanity/arxiv-vanity/blob/master/arxiv_vanity/scraper/arxiv_ids.py
 ARXIV_ID_PATTERN = r'([a-z\-]+(?:\.[A-Z]{2})?/\d{7}|\d+\.\d+)(v\d+)?'
 ARXIV_URL_RE = re.compile(r'arxiv.org/[^\/]+/({})(\.pdf)?'.format(ARXIV_ID_PATTERN), re.I)
@@ -29,7 +31,11 @@ def get_bot():
 
 r = get_bot()
 
-subreddit = r.subreddit('machinelearning')
+subreddits = [
+    r.subreddit('machinelearning'),
+    # r.subreddit('reinforcementlearning')
+    # r.subreddit('LanguageTechnology')
+]
 target_subreddit = r.subreddit('mlresearch')
 
 if r.read_only == False:
@@ -61,32 +67,35 @@ def scrape_arxiv(arxiv_id):
 
 def comment(cache):
     # print(time.asctime(), "searching")
-    try:
-        all_posts = subreddit.new(limit=100)
-        for post in all_posts:
-            match = ARXIV_URL_RE.search(post.url)
-            if match:
-                arxiv_id = match.group(1)
+    for subreddit in subreddits:
+        try:
+            all_posts = subreddit.new(limit=100)
+            for post in all_posts:
+                match = ARXIV_URL_RE.search(post.url)
+                if match:
+                    arxiv_id = match.group(1)
 
-                # crosspost
-                print('found', arxiv_id)
-                xpost(['r/researchml'], post)
+                    # crosspost
+                    print('found', arxiv_id)
+                    
 
-                # if cache.get(post.id) and cache.get(post.id) is 'T':
-                #     print "Parsed this post already: %s"%(post.permalink)
-                #     continue
-                # for comment in post.comments:
-                #     if str(comment.author) == 'arXiv_abstract_bot':
-                #         break
-                # else:
-                #     response = scrape_arxiv(arxiv_id)
-                #     post.reply(response)
-                #     cache.set(post.id, 'T')
-                #     print "Parsed post: %s"%(post.permalink)
-                #     print(arxiv_id, response)
-                #     time.sleep(10)
-    except Exception as error:
-        print(error)
+                    if cache.get(post.id) and cache.get(post.id) is 'T':
+                        print ("Parsed this post already: %s"%(post.permalink))
+                        continue
+                    # for comment in post.comments:
+                    #     if str(comment.author) == 'arXiv_abstract_bot':
+                    #         break
+                    else:
+                        xpost(['r/researchml'], post)
+                        # response = scrape_arxiv(arxiv_id)
+                        # post.reply(response)
+                        cache.set(post.id, 'T')
+                    #     print "Parsed post: %s"%(post.permalink)
+                    #     print(arxiv_id, response)
+                        time.sleep(10)
+        except Exception as error:
+            logger.error("Failed to scrape")
+            print(error)
 
 def xpost(subs, originalpost):
     # originalpost = where.submission
