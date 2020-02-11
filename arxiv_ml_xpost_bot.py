@@ -4,13 +4,13 @@ import requests
 import bs4
 import html2text
 import time, os
-import bmemcached
+import shelve
 import re
 from prawcore import NotFound
 import datetime
 
 
-from botlib import get_bot, get_memcache_client, get_logger
+from botlib import get_bot, get_logger
 
 logger = get_logger()
 
@@ -39,29 +39,30 @@ if r.read_only == False:
     print("Connected and running.")
 
 
-def comment(cache):
-    for subreddit in subreddits:
-        try:
-            all_posts = subreddit.new(limit=LIMIT_CHECK)
-            for post in all_posts:
-                match = ARXIV_URL_RE.search(post.url)
-                if match:
-                    arxiv_id = match.group(1)
+def comment():
+    with shelve.open('.arxiv_bot') as cache:
+        for subreddit in subreddits:
+            try:
+                all_posts = subreddit.new(limit=LIMIT_CHECK)
+                for post in all_posts:
+                    match = ARXIV_URL_RE.search(post.url)
+                    if match:
+                        arxiv_id = match.group(1)
 
-                    # crosspost
-                    print('found', arxiv_id)
-                    
+                        # crosspost
+                        print('found', arxiv_id)
+                        
 
-                    if cache.get(post.id) and cache.get(post.id) is 'T':
-                        print ("Parsed this post already: %s"%(post.permalink))
-                        continue
-                    else:
-                        xpost(['r/researchml'], post)
-                        cache.set(post.id, 'T')
-                        time.sleep(10)
-        except Exception as error:
-            logger.error("Failed to scrape")
-            print(error)
+                        if cache.get(post.id) and cache.get(post.id) is 'T':
+                            print ("Parsed this post already: %s"%(post.permalink))
+                            continue
+                        else:
+                            xpost(['r/researchml'], post)
+                            cache[post.id]='T'
+                            time.sleep(10)
+            except Exception as error:
+                logger.error("Failed to scrape")
+                print(error)
 
 def xpost(subs, originalpost):
     # originalpost = where.submission
@@ -111,8 +112,7 @@ def xpost(subs, originalpost):
 
 
 if __name__ == "__main__":
-    cache = get_memcache_client()
 
     while True:
-        comment(cache)
+        comment()
         time.sleep(SLEEP)

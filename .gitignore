@@ -1,3 +1,8 @@
+.rss_bot.*
+.arxiv_bot.*
+.vscode/*
+vars_copy.sh
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
