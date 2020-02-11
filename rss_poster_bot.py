@@ -17,7 +17,8 @@ r = get_bot()
 cache = get_memcache_client()
 
 SUBREDDIT = 'researchml'  # 'testingground4bots'
-SLEEP = 60
+SLEEP = 600
+MAX_AGE_DAYS = 1
 POST_DESCRIPTION = True
 DESCRIPTION_FORMAT = "{}"
 
@@ -27,7 +28,7 @@ sources = ["https://distill.pub/rss.xml", "https://www.shortscience.org/rss.xml"
 
 def run_bot(sources):
     sub = r.subreddit(SUBREDDIT)
-    t0 = datetime.datetime.utcnow().replace(tzinfo=pytz.utc) - datetime.timedelta(days=10) 
+    t0 = datetime.datetime.utcnow().replace(tzinfo=pytz.utc) - datetime.timedelta(days=MAX_AGE_DAYS) 
 
     logger.info("Start bot for subreddit %s", SUBREDDIT)
     while True:

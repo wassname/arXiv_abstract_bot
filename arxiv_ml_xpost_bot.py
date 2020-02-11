@@ -28,42 +28,21 @@ subreddits = [
     # r.subreddit('reinforcementlearning')
     # r.subreddit('LanguageTechnology')
 ]
-target_subreddit = r.subreddit('mlresearch')
-target_subreddit = r.subreddit('testingground4bots')
+# target_subreddit = r.subreddit('mlresearch')
+# target_subreddit = r.subreddit('testingground4bots')
+
+SLEEP = 600
+LIMIT_CHECK=20
 
 
 if r.read_only == False:
     print("Connected and running.")
-# alreadydone = set()
-
-
-# def scrape_arxiv(arxiv_id):
-#     url = 'https://arxiv.org/abs/{}'.format(arxiv_id)
-#     r = requests.get(url)
-#     soup = bs4.BeautifulSoup(r.text)
-#     abstract = soup.select('.abstract')[0]
-#     abstract = html2text.html2text(abstract.decode()).replace('\n', ' ')
-
-#     authors = soup.select('.authors')[0]
-#     authors = html2text.html2text(authors.decode()).replace('\n', ' ')
-#     authors = authors.replace('(/', '(http://arxiv.org/')
-
-#     title = soup.select('.title')[0]
-#     title =  html2text.html2text(title.decode()).replace('\n', ' ')[2:]
-
-#     abs_link = u'[Landing Page]({})'.format(url)
-#     pdf_link = u'[PDF Link](https://arxiv.org/pdf/{})'.format(arxiv_id)
-#     web_link = u'[Read as web page on arXiv Vanity](https://www.arxiv-vanity.com/papers/{}/)'.format(arxiv_id)
-#     links = u'{} | {} | {}'.format(pdf_link, abs_link, web_link)
-#     response = '\n\n'.join([title, authors, abstract, links]) 
-#     return response
 
 
 def comment(cache):
-    # print(time.asctime(), "searching")
     for subreddit in subreddits:
         try:
-            all_posts = subreddit.new(limit=100)
+            all_posts = subreddit.new(limit=LIMIT_CHECK)
             for post in all_posts:
                 match = ARXIV_URL_RE.search(post.url)
                 if match:
@@ -76,16 +55,9 @@ def comment(cache):
                     if cache.get(post.id) and cache.get(post.id) is 'T':
                         print ("Parsed this post already: %s"%(post.permalink))
                         continue
-                    # for comment in post.comments:
-                    #     if str(comment.author) == 'arXiv_abstract_bot':
-                    #         break
                     else:
                         xpost(['r/researchml'], post)
-                        # response = scrape_arxiv(arxiv_id)
-                        # post.reply(response)
                         cache.set(post.id, 'T')
-                    #     print "Parsed post: %s"%(post.permalink)
-                    #     print(arxiv_id, response)
                         time.sleep(10)
         except Exception as error:
             logger.error("Failed to scrape")
@@ -143,4 +115,4 @@ if __name__ == "__main__":
 
     while True:
         comment(cache)
-        time.sleep(30)
+        time.sleep(SLEEP)
