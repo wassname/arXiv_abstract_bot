@@ -25,7 +25,7 @@ r = get_bot()
 # source subreddits
 subreddits = [
     r.subreddit('machinelearning'),
-    r.subreddit('reinforcementlearning')
+    r.subreddit('reinforcementlearning'),
     r.subreddit('LanguageTechnology')
 ]
 # target_subreddit = r.subreddit('mlresearch')
@@ -34,7 +34,7 @@ subreddits = [
 SLEEP = 600
 LIMIT_CHECK = 20
 MIN_SECONDS = 60 * 60
-MIN_SCORE = 10
+MIN_SCORE = 5
 
 
 if r.read_only == False:
@@ -57,10 +57,10 @@ def comment():
                         # print('found', arxiv_id)
 
                         if cache.get(post.id) and cache.get(post.id) is 'T':
-                            print("Parsed this post already: %s. %s" % (post.permalink, post.id))
+                            print("Parsed this post already: %s. %s" % (post.permalink, post.id, post.url))
                             continue
                         else:
-                            print("posting", post, post.id, post.score, ts)
+                            print("posting", post, post.url, post.permalink, post.id, post.score, ts)
                             post.crosspost('researchml')
                             # xpost(['r/researchml'], post)
                             cache[post.id]='T'
