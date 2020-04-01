@@ -2,6 +2,7 @@
 .arxiv_bot.*
 .vscode/*
 vars_copy.sh
+vars_*.sh
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
