@@ -15,6 +15,7 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
 def get_logger():
     logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
     return logger
 
 def get_memcache_client(name):

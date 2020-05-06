@@ -25,7 +25,7 @@ DESCRIPTION_FORMAT = "{}"
 
 # main procedure
 
-sources = ["https://www.shortscience.org/rss.xml", "https://distill.pub/rss.xml", ]
+sources = ["https://www.shortscience.org/rss.xml"]#, "https://distill.pub/rss.xml", ]
 # TODO might be nice to check shortscience votes 'shortscience:votes'
 
 # note this is what the entries look like
